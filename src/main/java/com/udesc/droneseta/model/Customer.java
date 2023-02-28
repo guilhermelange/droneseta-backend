@@ -1,5 +1,7 @@
 package com.udesc.droneseta.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,6 +42,11 @@ public class Customer {
 	
 	@Column(nullable = false)
 	private String creditCard;
+	
+	@Column(nullable = false)
+	@Size(min=6, message="A senha deve possuir ao menos 6 caracteres")
+	@JsonIgnore
+	private String password;
 
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
