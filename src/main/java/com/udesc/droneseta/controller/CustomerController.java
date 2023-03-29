@@ -33,6 +33,7 @@ public class CustomerController {
 	@PostMapping("")
 	public ResponseEntity<?> create(@Valid @RequestBody Customer customer) throws Exception {
 		Example<Customer> example = Example.of(customer);
+		System.out.println(customer);
 		Optional<Customer> findCustomer = repository.findOne(example);
 		
 		if (!findCustomer.isEmpty()) {

@@ -2,6 +2,7 @@ package com.udesc.droneseta.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,17 @@ public class Customer {
 		this.creditCard = creditCard;
 	}
 
+	public Customer(Integer id, @Size(min = 3, message = "O nome deve ter pelo menos 3 caracteres") String name,
+					@Size(min = 11, max = 11, message = "O CPF deve possuir 11 caracteres") String cpf, String creditCard,
+					String password) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.cpf = cpf;
+		this.creditCard = creditCard;
+		this.password = password;
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(nullable = false)
@@ -45,7 +57,7 @@ public class Customer {
 	
 	@Column(nullable = false)
 	@Size(min=6, message="A senha deve possuir ao menos 6 caracteres")
-	@JsonIgnore
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
 	@OneToOne(cascade = CascadeType.ALL)
@@ -103,6 +115,14 @@ public class Customer {
 
 	public void setDeliveryAddress(Address deliveryAddress) {
 		this.deliveryAddress = deliveryAddress;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	@Override
