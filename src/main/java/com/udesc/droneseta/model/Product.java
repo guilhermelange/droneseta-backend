@@ -10,13 +10,14 @@ import jakarta.validation.constraints.Size;
 public class Product {
     public Product() {}
 
-    public Product(Integer id, String name, String description, String size, double price, long stock) {
+    public Product(Integer id, String name, String description, String size, double price, long stock, String img) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.size = size;
         this.price = price;
         this.stock = stock;
+        this.img = img;
     }
 
     @Id
@@ -43,6 +44,10 @@ public class Product {
     @Column(nullable = false)
     @NotNull()
     private long stock;
+
+    @Column(nullable = false, columnDefinition = "text default ''")
+    @NotEmpty()
+    private String img;
 
     public Integer getId() {
         return id;
@@ -90,5 +95,13 @@ public class Product {
 
     public void setStock(long stock) {
         this.stock = stock;
+    }
+
+    public String getImg() {
+        return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 }
