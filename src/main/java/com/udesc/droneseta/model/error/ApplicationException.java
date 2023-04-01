@@ -1,4 +1,4 @@
-package com.udesc.droneseta.common.error;
+package com.udesc.droneseta.model.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

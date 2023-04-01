@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.udesc.droneseta.common.error.ApplicationException;
+import com.udesc.droneseta.model.error.ApplicationException;
 import com.udesc.droneseta.model.Customer;
 import com.udesc.droneseta.repository.AddressRepository;
 import com.udesc.droneseta.repository.CustomerRepository;

@@ -1,4 +1,4 @@
-package com.udesc.droneseta.common.error;
+package com.udesc.droneseta.model.error;
 
 public class ErrorDetails {
 	private Integer status;

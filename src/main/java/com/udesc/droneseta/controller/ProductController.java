@@ -1,6 +1,6 @@
 package com.udesc.droneseta.controller;
 
-import com.udesc.droneseta.common.error.ApplicationException;
+import com.udesc.droneseta.model.error.ApplicationException;
 import com.udesc.droneseta.model.Product;
 import com.udesc.droneseta.repository.ProductRepository;
 import jakarta.validation.Valid;
