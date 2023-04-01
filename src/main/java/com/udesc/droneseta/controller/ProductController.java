@@ -32,8 +32,12 @@ public class ProductController {
 	}
 		
 	@GetMapping("")
-	public ResponseEntity<?> findAll(){
-		return ResponseEntity.ok().body(repository.findAll());
+	public ResponseEntity<?> findAll(@RequestParam(value = "name", defaultValue = "") String name){
+		if (name.isEmpty()) {
+			return ResponseEntity.ok().body(repository.findAll());
+		} else {
+			return ResponseEntity.ok().body(repository.findAllByNameContainingIgnoreCase(name));
+		}
 	}
 	
 	@GetMapping("/{id}")
