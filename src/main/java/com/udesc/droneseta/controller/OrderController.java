@@ -2,6 +2,9 @@ package com.udesc.droneseta.controller;
 
 import java.util.Optional;
 
+import com.udesc.droneseta.model.dto.OrderDTO;
+import com.udesc.droneseta.model.enumerator.OrderStatus;
+import com.udesc.droneseta.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
@@ -28,11 +31,26 @@ public class OrderController {
 	@Autowired
 	private OrderRepository repository;
 
-	@PostMapping("")
-	public ResponseEntity<?> create(@Valid @RequestBody Order order) throws Exception {
-            Order savedOrder = repository.save(order);
+	@Autowired
+	private CustomerRepository customerRepository;
 
-            return ResponseEntity.ok().body(savedOrder);
+	@PostMapping("")
+	public ResponseEntity<?> create(@Valid @RequestBody OrderDTO order) throws Exception {
+		Optional<Customer> customer = customerRepository.findById(order.getCustomer_id());
+
+		if (customer.isEmpty()) {
+			throw new ApplicationException("Invalid Customer ID", HttpStatus.NOT_FOUND);
+		}
+
+		Order orderSave = new Order();
+		orderSave.setPrice(order.getPrice());
+		orderSave.setCustomer(customer.get());
+		orderSave.setStatus(OrderStatus.PENDENTE);
+		if (order.getStatus() != null)
+			orderSave.setStatus(order.getStatus());
+		Order savedOrder = repository.save(orderSave);
+
+		return ResponseEntity.ok().body(savedOrder);
 	}
 
 	@GetMapping("")

@@ -41,7 +41,7 @@ public class Customer {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Column(nullable = false)
+	@Column(nullable = false, unique=true, name = "id")
 	private Integer id;
 	
 	@Column(nullable = false)

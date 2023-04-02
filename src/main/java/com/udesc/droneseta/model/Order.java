@@ -1,5 +1,7 @@
 package com.udesc.droneseta.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.udesc.droneseta.model.enumerator.OrderStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,11 +37,12 @@ public class Order {
 
     @Column(nullable = false)
     @Value("1")
-    private int status;
+    private OrderStatus status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "costumer_id", referencedColumnName = "id")
     @NotNull()
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Customer customer;
 
     public Integer getId() {
@@ -58,14 +61,13 @@ public class Order {
         this.price = price;
     }
 
-    public int getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
-
     public Customer getCustomer() {
         return customer;
     }
