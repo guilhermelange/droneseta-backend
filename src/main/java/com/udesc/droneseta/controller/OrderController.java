@@ -114,9 +114,11 @@ public class OrderController {
             return ResponseEntity.noContent().build();
 	}
 
-	@GetMapping("/customer")
-	public ResponseEntity<?> findByCustomer(@Valid @RequestBody Customer customer) throws Exception {
-            return ResponseEntity.ok().body(repository.findByCustomer(customer));
+	@GetMapping("/customer/{id}")
+	public ResponseEntity<?> findByCustomer(@PathVariable Integer id) throws Exception {
+		Customer customer = new Customer();
+		customer.setId(id);
+		return ResponseEntity.ok().body(repository.findByCustomer(customer));
 	}
 
 	@GetMapping(value = "/report")
