@@ -1,5 +1,6 @@
 package com.udesc.droneseta.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class CustomerController {
 		
 	@GetMapping("")
 	public ResponseEntity<?> findAll(){
-		return ResponseEntity.ok().body(repository.findAll());
+		return ResponseEntity.ok().body(repository.findAllProjectedBy());
 	}
 	
 	@GetMapping("/{id}")
