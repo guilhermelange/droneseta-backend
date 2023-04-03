@@ -1,5 +1,8 @@
 package com.udesc.droneseta.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,11 +10,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.udesc.droneseta.model.dto.OrderDTO;
+import com.udesc.droneseta.model.dto.OrderStatusDTO;
 import com.udesc.droneseta.model.enumerator.OrderStatus;
 import com.udesc.droneseta.repository.CustomerRepository;
+import com.udesc.droneseta.service.OrderReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Example;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +30,7 @@ import com.udesc.droneseta.repository.OrderRepository;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("order")
 public class OrderController {
 
 	@Autowired
@@ -57,8 +65,7 @@ public class OrderController {
 		} else {
 			List<String> statusStringSearch = Arrays.stream(status.split(",")).toList();
 			List<OrderStatus> statusSearch = statusStringSearch.stream().map(item -> (OrderStatus.valueOf(item))).collect(Collectors.toList());
-
-			return ResponseEntity.ok().body(repository.findAllByStatusIn(statusSearch));
+			return ResponseEntity.ok().body(repository.findAllOrderFilter(statusSearch));
 		}
 	}
 
@@ -85,6 +92,20 @@ public class OrderController {
             return ResponseEntity.ok().body(savedOrder);
 	}
 
+	@PatchMapping("/status/{id}")
+	public ResponseEntity<?> updateStatus(@PathVariable Integer id, @Valid @RequestBody OrderStatusDTO order) throws Exception {
+		Optional<Order> findOrder = repository.findById(id);
+
+		if (findOrder.isEmpty()) {
+			throw new ApplicationException("ID não localizado", HttpStatus.NOT_FOUND);
+		}
+
+		Order currentOrder = findOrder.get();
+		currentOrder.setStatus(order.getStatus());
+		Order savedOrder = repository.save(currentOrder);
+
+		return ResponseEntity.ok().body(savedOrder);
+	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> deleteAll(@PathVariable Integer id) throws Exception {
@@ -93,8 +114,25 @@ public class OrderController {
             return ResponseEntity.noContent().build();
 	}
 
-        @GetMapping("/customer")
+	@GetMapping("/customer")
 	public ResponseEntity<?> findByCustomer(@Valid @RequestBody Customer customer) throws Exception {
             return ResponseEntity.ok().body(repository.findByCustomer(customer));
+	}
+
+	@GetMapping(value = "/report")
+	public ResponseEntity<?> generateReport() throws Exception {
+		OrderReportService service = new OrderReportService(repository);
+		String filename = service.generateReport();
+		File file = new File(filename);
+
+		byte[] bytes = Files.readAllBytes(file.toPath());
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=OrderReport.xlsx");
+		return ResponseEntity.ok()
+				.headers(headers)
+				.contentLength(bytes.length)
+				.contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+				.body(resource);
 	}
 }
