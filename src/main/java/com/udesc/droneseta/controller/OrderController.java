@@ -1,6 +1,10 @@
 package com.udesc.droneseta.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.udesc.droneseta.model.dto.OrderDTO;
 import com.udesc.droneseta.model.enumerator.OrderStatus;
@@ -9,14 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.udesc.droneseta.model.error.ApplicationException;
 import com.udesc.droneseta.model.Order;
@@ -54,8 +51,15 @@ public class OrderController {
 	}
 
 	@GetMapping("")
-	public ResponseEntity<?> findAll(){
-            return ResponseEntity.ok().body(repository.findAll());
+	public ResponseEntity<?> findAll(@RequestParam(value = "status", defaultValue = "") String status){
+		if (status.isEmpty()) {
+			return ResponseEntity.ok().body(repository.findAll());
+		} else {
+			List<String> statusStringSearch = Arrays.stream(status.split(",")).toList();
+			List<OrderStatus> statusSearch = statusStringSearch.stream().map(item -> (OrderStatus.valueOf(item))).collect(Collectors.toList());
+
+			return ResponseEntity.ok().body(repository.findAllByStatusIn(statusSearch));
+		}
 	}
 
 	@GetMapping("/{id}")
