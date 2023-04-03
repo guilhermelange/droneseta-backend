@@ -1,5 +1,6 @@
 package com.udesc.droneseta.model;
 
+import com.udesc.droneseta.model.enumerator.DeliveryStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +22,13 @@ public class Delivery {
         this.quantity = quantity;
     }
 
+    public Delivery(Integer id, Integer quantity, DeliveryStatus status) {
+        this.id = id;
+        this.quantity = quantity;
+        this.status = status;
+    }
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -32,7 +40,7 @@ public class Delivery {
 
     @Column(nullable = false)
     @Value("1")
-    private int status;
+    private DeliveryStatus status;
 
     public Integer getId() {
         return id;
@@ -50,11 +58,11 @@ public class Delivery {
         this.quantity = quantity;
     }
 
-    public int getStatus() {
+    public DeliveryStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(DeliveryStatus status) {
         this.status = status;
     }
 
