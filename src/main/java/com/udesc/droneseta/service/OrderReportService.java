@@ -3,9 +3,7 @@ package com.udesc.droneseta.service;
 import com.udesc.droneseta.model.dto.OrderPendingDTO;
 import com.udesc.droneseta.model.enumerator.OrderStatus;
 import com.udesc.droneseta.repository.OrderRepository;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -30,11 +28,28 @@ public class OrderReportService {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet("Relatório");
 
+        XSSFCellStyle headerCellStyle = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setBold(true);
+        headerCellStyle.setFont(font);
+
+
         XSSFRow headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("Nome da Pessoa");
-        headerRow.createCell(1).setCellValue("Número do Cartão de Crédito");
-        headerRow.createCell(2).setCellValue("Valor da Compra");
-        headerRow.createCell(3).setCellValue("Status");
+        XSSFCell cell1 = headerRow.createCell(0);
+        XSSFCell cell2 = headerRow.createCell(1);
+        XSSFCell cell3 = headerRow.createCell(2);
+        XSSFCell cell4 = headerRow.createCell(3);
+
+
+        cell1.setCellValue("Nome da Pessoa");
+        cell2.setCellValue("Número do Cartão de Crédito");
+        cell3.setCellValue("Valor da Compra");
+        cell4.setCellValue("Status");
+
+        cell1.setCellStyle(headerCellStyle);
+        cell2.setCellStyle(headerCellStyle);
+        cell3.setCellStyle(headerCellStyle);
+        cell4.setCellStyle(headerCellStyle);
 
         List<OrderPendingDTO> orders = repository.findAllOrderFilter(Arrays.asList(OrderStatus.ENTREGUE, OrderStatus.CONFIRMADO, OrderStatus.TRANSITO));
 
