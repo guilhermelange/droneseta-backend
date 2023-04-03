@@ -55,8 +55,8 @@ public class Customer {
 	@Column(nullable = false)
 	private String creditCard;
 	
-	@Column(nullable = false)
-	@Size(min=6, message="A senha deve possuir ao menos 6 caracteres")
+	@Column(nullable = false, updatable= false)
+//	@Size(min=6, message="A senha deve possuir ao menos 6 caracteres")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
