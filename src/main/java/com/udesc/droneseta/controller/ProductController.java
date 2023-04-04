@@ -9,7 +9,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.Optional;
 
 @RestController
@@ -61,6 +63,24 @@ public class ProductController {
 		return ResponseEntity.ok().body(savedProduct);
 	}
 
+	@PostMapping("/image/{id}")
+	public ResponseEntity<?> updateImg(@PathVariable Integer id, @RequestParam("file") MultipartFile file) throws Exception {
+		Optional<Product> product = repository.findById(id);
+		if (product.isEmpty()) {
+			throw new ApplicationException("ID não localizado", HttpStatus.NOT_FOUND);
+		}
+
+		if (file.isEmpty()) {
+			throw new ApplicationException("Por favor, selecione um arquivo", HttpStatus.NOT_FOUND);
+		}
+
+		String fileLocation = (new File("")).getAbsolutePath() + "\\src\\main\\resources\\static\\" + product.get().getImg();
+
+		System.out.println(fileLocation);
+		file.transferTo(new File(fileLocation));
+
+		return ResponseEntity.noContent().build();
+	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<?> findAll(@PathVariable Integer id) throws Exception {

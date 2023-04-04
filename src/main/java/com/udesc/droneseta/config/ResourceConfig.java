@@ -9,10 +9,10 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 public class ResourceConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/static/**")
+        /*registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(3600)
                 .resourceChain(true)
-                .addResolver(new PathResourceResolver());
+                .addResolver(new PathResourceResolver());*/
     }
 }
