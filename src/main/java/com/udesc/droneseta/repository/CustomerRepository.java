@@ -11,4 +11,6 @@ import java.util.List;
 public interface CustomerRepository extends JpaRepository<Customer, Integer>{
     @Query("SELECT c.id as id, c.name as name, c.cpf as cpf, c.creditCard as creditCard from Customer c")
     List<CustomerAllDTO> findAllProjectedBy();
+
+    Customer findFirstByCpfEquals(String cpf);
 }

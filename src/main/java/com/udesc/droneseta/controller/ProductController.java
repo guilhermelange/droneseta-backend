@@ -76,7 +76,6 @@ public class ProductController {
 
 		String fileLocation = (new File("")).getAbsolutePath() + "\\src\\main\\resources\\static\\" + product.get().getImg();
 
-		System.out.println(fileLocation);
 		file.transferTo(new File(fileLocation));
 
 		return ResponseEntity.noContent().build();

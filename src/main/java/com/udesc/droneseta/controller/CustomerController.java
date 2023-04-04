@@ -3,6 +3,7 @@ package com.udesc.droneseta.controller;
 import java.util.List;
 import java.util.Optional;
 
+import com.udesc.droneseta.config.PasswordSecure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,10 @@ public class CustomerController {
 		if (!findCustomer.isEmpty()) {
 			throw new ApplicationException("CPF já utilizado", HttpStatus.BAD_REQUEST);
 		}
-		
+
+		String passwordEncrypt = PasswordSecure.encrypt(customer.getPassword());
+		customer.setPassword(passwordEncrypt);
+
 		Customer savedCustomer = repository.save(customer);
 		return ResponseEntity.ok().body(savedCustomer);
 	}
