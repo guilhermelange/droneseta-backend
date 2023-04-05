@@ -13,12 +13,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
+import java.util.Collection;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "customer")
-public class Customer {
+public class Customer implements UserDetails {
 	public Customer() {}
-	
+
 	public Customer(Integer id, @Size(min = 3, message = "O nome deve ter pelo menos 3 caracteres") String name,
 			@Size(min = 11, max = 11, message = "O CPF deve possuir 11 caracteres") String cpf, String creditCard) {
 		super();
@@ -43,18 +46,18 @@ public class Customer {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(nullable = false, unique=true, name = "id")
 	private Integer id;
-	
+
 	@Column(nullable = false)
 	@Size(min=3, message="O nome deve ter pelo menos 3 caracteres")
 	private String name;
-	
+
 	@Column(nullable = false)
 	@Size(min=11, max = 11, message="O CPF deve possuir 11 caracteres")
 	private String cpf;
-	
+
 	@Column(nullable = false)
 	private String creditCard;
-	
+
 	@Column(nullable = false, updatable= false)
 //	@Size(min=6, message="A senha deve possuir ao menos 6 caracteres")
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -63,11 +66,11 @@ public class Customer {
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
 	private Address address;
-	
+
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "delivery_address_id", referencedColumnName = "id")
 	private Address deliveryAddress;
-	
+
 	public Integer getId() {
 		return id;
 	}
@@ -103,12 +106,12 @@ public class Customer {
 	public Address getAddress() {
 		return address;
 	}
-	
+
 	public void setAddress(Address address) {
 		this.address = address;
 	}
 
-	
+
 	public Address getDeliveryAddress() {
 		return deliveryAddress;
 	}
@@ -130,4 +133,35 @@ public class Customer {
 		return "Customer [id=" + id + ", name=" + name + ", cpf=" + cpf + ", creditCard=" + creditCard + ", address="
 				+ address + ", deliveryAddress=" + deliveryAddress + "]";
 	}
+
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return null;
+        }
+
+        @Override
+        public String getUsername() {
+            return getCpf();
+        }
+
+        @Override
+        public boolean isAccountNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isAccountNonLocked() {
+            return true;
+        }
+
+        @Override
+        public boolean isCredentialsNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
+        }
+
 }
