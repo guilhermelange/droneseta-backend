@@ -1,9 +1,7 @@
 package com.udesc.droneseta.controller;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +14,6 @@ import com.udesc.droneseta.repository.CustomerRepository;
 import com.udesc.droneseta.service.OrderReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.data.domain.Example;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,11 +23,16 @@ import org.springframework.web.bind.annotation.*;
 import com.udesc.droneseta.model.error.ApplicationException;
 import com.udesc.droneseta.model.Order;
 import com.udesc.droneseta.model.Customer;
+import com.udesc.droneseta.model.OrderItem;
+import com.udesc.droneseta.model.Product;
+import com.udesc.droneseta.model.dto.OrderItemDTO;
+import com.udesc.droneseta.repository.OrderItemRepository;
 import com.udesc.droneseta.repository.OrderRepository;
+import com.udesc.droneseta.repository.ProductRepository;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("order")
+@RequestMapping("/order")
 public class OrderController {
 
 	@Autowired
@@ -38,6 +40,12 @@ public class OrderController {
 
 	@Autowired
 	private CustomerRepository customerRepository;
+
+	@Autowired
+	private OrderItemRepository orderItemRepository;
+
+	@Autowired
+	private ProductRepository productRepository;
 
 	@PostMapping("")
 	public ResponseEntity<?> create(@Valid @RequestBody OrderDTO order) throws Exception {
@@ -54,6 +62,19 @@ public class OrderController {
 		if (order.getStatus() != null)
 			orderSave.setStatus(order.getStatus());
 		Order savedOrder = repository.save(orderSave);
+
+                OrderItem orderItemSave = new OrderItem();
+                orderItemSave.setOrder(savedOrder);
+
+                for (OrderItemDTO o : order.getItems()) {
+                    Optional<Product> prod = productRepository.findById(o.getProduct_id());
+
+                    orderItemSave.setQuantity(o.getQuantity());
+                    orderItemSave.setProduct(prod.get());
+                    orderItemSave.setPrice(o.getPrice());
+
+                    orderItemRepository.save(orderItemSave);
+                }
 
 		return ResponseEntity.ok().body(savedOrder);
 	}

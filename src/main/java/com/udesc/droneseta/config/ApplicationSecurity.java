@@ -24,7 +24,7 @@ public class ApplicationSecurity {
             .requestMatchers(
                     "/product/**",
                     "/static/**",
-                    "/auth",
+                    "/auth/**",
                     "/signup")
                 .permitAll()
             .requestMatchers(HttpMethod.POST, "/customer").permitAll()
