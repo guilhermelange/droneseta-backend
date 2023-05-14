@@ -9,11 +9,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -50,8 +50,9 @@ public class Order {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<OrderItem> items;
+
+    private LocalDateTime delivery;
 
     public Integer getId() {
         return id;
@@ -93,9 +94,17 @@ public class Order {
         this.items = items;
     }
 
+    public LocalDateTime getDelivery() {
+        return delivery;
+    }
+
+    public void setDelivery(LocalDateTime delivery) {
+        this.delivery = delivery;
+    }
+
     @Override
     public String toString() {
-        return "Order{" + "id=" + id + ", price=" + price + ", status=" + status + ", customer=" + customer + '}';
+        return "Order{" + "id=" + id + ", price=" + price + ", status=" + status + ", customer=" + customer + ", items=" + items + '}';
     }
 
 }

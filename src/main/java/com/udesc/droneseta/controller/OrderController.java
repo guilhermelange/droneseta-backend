@@ -23,13 +23,18 @@ import org.springframework.web.bind.annotation.*;
 import com.udesc.droneseta.model.error.ApplicationException;
 import com.udesc.droneseta.model.Order;
 import com.udesc.droneseta.model.Customer;
+import com.udesc.droneseta.model.Delivery;
 import com.udesc.droneseta.model.OrderItem;
 import com.udesc.droneseta.model.Product;
 import com.udesc.droneseta.model.dto.OrderItemDTO;
+import com.udesc.droneseta.model.enumerator.DeliveryStatus;
+import com.udesc.droneseta.repository.DeliveryRepository;
 import com.udesc.droneseta.repository.OrderItemRepository;
 import com.udesc.droneseta.repository.OrderRepository;
 import com.udesc.droneseta.repository.ProductRepository;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/order")
@@ -47,6 +52,9 @@ public class OrderController {
 	@Autowired
 	private ProductRepository productRepository;
 
+        @Autowired
+        private DeliveryRepository deliveryRepository;
+
 	@PostMapping("")
 	public ResponseEntity<?> create(@Valid @RequestBody OrderDTO order) throws Exception {
 		Optional<Customer> customer = customerRepository.findById(order.getCustomer_id());
@@ -63,17 +71,21 @@ public class OrderController {
 			orderSave.setStatus(order.getStatus());
 		Order savedOrder = repository.save(orderSave);
 
-                OrderItem orderItemSave = new OrderItem();
-                orderItemSave.setOrder(savedOrder);
-
                 for (OrderItemDTO o : order.getItems()) {
-                    Optional<Product> prod = productRepository.findById(o.getProduct_id());
+                    Optional<Product> op = productRepository.findById(o.getProduct_id());
+                    Product prod = op.get();
 
+                    OrderItem orderItemSave = new OrderItem();
+                    orderItemSave.setOrder(savedOrder);
                     orderItemSave.setQuantity(o.getQuantity());
-                    orderItemSave.setProduct(prod.get());
+                    orderItemSave.setProduct(prod);
                     orderItemSave.setPrice(o.getPrice());
 
                     orderItemRepository.save(orderItemSave);
+
+                    // Atualiza o estoque
+                    prod.setStock(prod.getStock() - o.getQuantity());
+                    productRepository.save(prod);
                 }
 
 		return ResponseEntity.ok().body(savedOrder);
@@ -123,6 +135,76 @@ public class OrderController {
 
 		Order currentOrder = findOrder.get();
 		currentOrder.setStatus(order.getStatus());
+
+                if (currentOrder.getStatus().getKey() == OrderStatus.CONFIRMADO.getKey()) {
+                    LocalDateTime atual = LocalDateTime.now();
+
+                    for (OrderItem oi : currentOrder.getItems()) {
+                        int qtd = oi.getQuantity();
+
+                        while (qtd > 0) {
+                            Optional<Delivery> last = deliveryRepository.findFirstByOrderByIdDesc();
+                            Delivery d = new Delivery();
+                            Boolean novaViagem = last.isEmpty() || last.get().getQuantity() == 10
+                                || last.get().getDateTime().isBefore(atual);
+
+                            if (!novaViagem) {
+                                d = last.get();
+                            }
+
+                            int restante = 10 - d.getQuantity();
+                            int enviar = qtd;
+
+                            if (enviar > restante) {
+                                enviar = restante;
+                            }
+
+                            qtd -= enviar;
+
+                            if (novaViagem) {
+                                // Se nao tinha entregas utiliza a data atual
+                                if (last.isEmpty()) {
+                                    d.setDateTime(atual);
+                                    d.setStatus(DeliveryStatus.TRANSITO);
+
+                                    currentOrder.setStatus(OrderStatus.TRANSITO);
+                                } else {
+                                    LocalDateTime termino = last.get().getDateTime().plusHours(1);
+
+                                    // Se a última entrega já terminou, utiliza a data atual
+                                    if (termino.isBefore(atual)) {
+                                        d.setDateTime(atual);
+                                        d.setStatus(DeliveryStatus.TRANSITO);
+
+                                        currentOrder.setStatus(OrderStatus.TRANSITO);
+                                    } else {
+                                        // Se a última entrega não terminou então a próxima sairá assim que acabar a última
+                                        d.setDateTime(termino);
+                                        d.setStatus(DeliveryStatus.AGUARDANDO);
+                                    }
+                                }
+
+                                d.setQuantity(enviar);
+                            } else {
+                                d.setQuantity(d.getQuantity() + enviar);
+                            }
+
+                            deliveryRepository.save(d);
+
+                            currentOrder.setDelivery(d.getDateTime().plusHours(1));
+                        }
+                    }
+                } else if (currentOrder.getStatus().getKey() == OrderStatus.CANCELADO.getKey()) {
+                    for (OrderItem oi : currentOrder.getItems()) {
+                        Optional<Product> op = productRepository.findById(oi.getProduct().getId());
+                        Product prod = op.get();
+
+                        // Atualiza o estoque
+                        prod.setStock(prod.getStock() + oi.getQuantity());
+                        productRepository.save(prod);
+                    }
+                }
+
 		Order savedOrder = repository.save(currentOrder);
 
 		return ResponseEntity.ok().body(savedOrder);
@@ -137,6 +219,8 @@ public class OrderController {
 
 	@GetMapping("/customer/{id}")
 	public ResponseEntity<?> findByCustomer(@PathVariable Integer id) throws Exception {
+                updateStatus();
+
 		Customer customer = new Customer();
 		customer.setId(id);
 		return ResponseEntity.ok().body(repository.findByCustomer(customer));
@@ -158,4 +242,23 @@ public class OrderController {
 				.contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
 				.body(resource);
 	}
+
+        private void updateStatus() {
+            List<OrderStatus> status = new ArrayList<>();
+            status.add(OrderStatus.TRANSITO);
+            status.add(OrderStatus.CONFIRMADO);
+
+            LocalDateTime atual = LocalDateTime.now();
+
+            for (Order o : repository.findAllByStatusIn(status)) {
+                if (o.getDelivery().isBefore(atual)) {
+                    o.setStatus(OrderStatus.ENTREGUE);
+                } else if (o.getDelivery().minusHours(1).isBefore(atual)) {
+                    o.setStatus(OrderStatus.TRANSITO);
+                }
+
+                repository.save(o);
+            }
+        }
+
 }

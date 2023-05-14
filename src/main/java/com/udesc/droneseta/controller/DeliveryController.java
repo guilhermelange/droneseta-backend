@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.udesc.droneseta.model.error.ApplicationException;
 import com.udesc.droneseta.model.Delivery;
+import com.udesc.droneseta.model.enumerator.DeliveryStatus;
 import com.udesc.droneseta.repository.DeliveryRepository;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/delivery")
@@ -35,6 +39,8 @@ public class DeliveryController {
 
 	@GetMapping("")
 	public ResponseEntity<?> findAll(){
+            updateStatus();
+
             return ResponseEntity.ok().body(repository.findAll());
 	}
 
@@ -67,4 +73,24 @@ public class DeliveryController {
 
             return ResponseEntity.noContent().build();
 	}
+
+        private void updateStatus() {
+            List<DeliveryStatus> status = new ArrayList<>();
+            status.add(DeliveryStatus.TRANSITO);
+            status.add(DeliveryStatus.AGUARDANDO);
+
+            LocalDateTime atual = LocalDateTime.now();
+
+            for (Delivery d : repository.findAllByStatusIn(status)) {
+                if (d.getDateTime().plusHours(1).isBefore(atual)) {
+                    d.setStatus(DeliveryStatus.FINALIZADO);
+                } else if (d.getDateTime().isBefore(atual)) {
+                    d.setStatus(DeliveryStatus.TRANSITO);
+                }
+
+                repository.save(d);
+            }
+        }
+
+
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Value;
 
 @Entity
@@ -28,7 +29,6 @@ public class Delivery {
         this.status = status;
     }
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
@@ -41,6 +41,8 @@ public class Delivery {
     @Column(nullable = false)
     @Value("1")
     private DeliveryStatus status;
+
+    private LocalDateTime dateTime;
 
     public Integer getId() {
         return id;
@@ -66,9 +68,17 @@ public class Delivery {
         this.status = status;
     }
 
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
+
     @Override
     public String toString() {
-        return "Delivery{" + "id=" + id + ", quantity=" + quantity + ", status=" + status + '}';
+        return "Delivery{" + "id=" + id + ", quantity=" + quantity + ", status=" + status + ", dateTime=" + dateTime + '}';
     }
 
 }

@@ -80,7 +80,6 @@ public class OrderItem {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     @NotNull()
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Product product;
 
     @NotNull()
@@ -88,5 +87,10 @@ public class OrderItem {
 
     @NotNull()
     private double price;
+
+    @Override
+    public String toString() {
+        return "OrderItem{" + "id=" + id + ", order=" + order.getId() + ", product=" + product.getId() + ", quantity=" + quantity + ", price=" + price + '}';
+    }
 
 }
