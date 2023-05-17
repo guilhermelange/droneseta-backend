@@ -1,14 +1,19 @@
 package com.udesc.droneseta.model;
 
 import com.udesc.droneseta.model.enumerator.DeliveryStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 
 @Entity
@@ -42,6 +47,11 @@ public class Delivery {
     @Value("1")
     private DeliveryStatus status;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    @NotNull
+    private Order order;
+
     private LocalDateTime dateTime;
 
     public Integer getId() {
@@ -74,6 +84,14 @@ public class Delivery {
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     @Override

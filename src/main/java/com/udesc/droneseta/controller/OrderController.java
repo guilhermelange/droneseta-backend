@@ -35,6 +35,7 @@ import com.udesc.droneseta.repository.ProductRepository;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/order")
@@ -146,7 +147,8 @@ public class OrderController {
                             Optional<Delivery> last = deliveryRepository.findFirstByOrderByIdDesc();
                             Delivery d = new Delivery();
                             Boolean novaViagem = last.isEmpty() || last.get().getQuantity() == 10
-                                || last.get().getDateTime().isBefore(atual);
+                                || last.get().getDateTime().isBefore(atual)
+                                || !Objects.equals(last.get().getOrder().getId(), currentOrder.getId());
 
                             if (!novaViagem) {
                                 d = last.get();
@@ -185,13 +187,14 @@ public class OrderController {
                                 }
 
                                 d.setQuantity(enviar);
+                                d.setOrder(currentOrder);
                             } else {
                                 d.setQuantity(d.getQuantity() + enviar);
                             }
 
                             deliveryRepository.save(d);
 
-                            currentOrder.setDelivery(d.getDateTime().plusHours(1));
+                            currentOrder.setArrival(d.getDateTime().plusHours(1));
                         }
                     }
                 } else if (currentOrder.getStatus().getKey() == OrderStatus.CANCELADO.getKey()) {
@@ -251,9 +254,9 @@ public class OrderController {
             LocalDateTime atual = LocalDateTime.now();
 
             for (Order o : repository.findAllByStatusIn(status)) {
-                if (o.getDelivery().isBefore(atual)) {
+                if (o.getArrival().isBefore(atual)) {
                     o.setStatus(OrderStatus.ENTREGUE);
-                } else if (o.getDelivery().minusHours(1).isBefore(atual)) {
+                } else if (o.getArrival().minusHours(1).isBefore(atual)) {
                     o.setStatus(OrderStatus.TRANSITO);
                 }
 

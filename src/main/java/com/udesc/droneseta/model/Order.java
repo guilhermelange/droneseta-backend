@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -52,7 +53,7 @@ public class Order {
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private List<OrderItem> items;
 
-    private LocalDateTime delivery;
+    private LocalDateTime arrival;
 
     public Integer getId() {
         return id;
@@ -94,12 +95,12 @@ public class Order {
         this.items = items;
     }
 
-    public LocalDateTime getDelivery() {
-        return delivery;
+    public LocalDateTime getArrival() {
+        return arrival;
     }
 
-    public void setDelivery(LocalDateTime delivery) {
-        this.delivery = delivery;
+    public void setArrival(LocalDateTime delivery) {
+        this.arrival = delivery;
     }
 
     @Override
